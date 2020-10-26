@@ -1,0 +1,361 @@
+**
+ * Hello! This is a template that receives data from a graphQL query that corresponds to blog post content, and renders out the content modules.
+ * It's a mix of HTML, the salesforce commerce cloud (SFCC) template language (somewhat similar to handlebars, etc) and a backend script that is basically javascript syntax.
+ */
+
+<isif condition="${pdict.GraphJSONObject.data.entries[0] == null}">
+	<isredirect location="${URLUtils.url('Craft-API')}"/>
+</isif>
+<iscontent type="text/html" charset="UTF-8" compact="true"/>
+<isdecorate template="craft/pt_craft">
+
+    <iscache type="relative" hour="24"/>
+  	<isinclude template="util/modules"/>
+
+	<iscomment>
+        Loops over blog post module json and render modules
+	</iscomment>
+
+    <div id="primary">
+        <div class="thread-single">
+            
+            <isset name="entry" value="${pdict.GraphJSONObject.data.entries[0]}" scope="page" />
+            <isset name="currentPostSlug" value="${pdict.GraphJSONObject.data.entries[0].slug}" scope="page" />
+            
+            <div class="back-breadcrumb">
+                <a class="breadcrumb-element" href="${URLUtils.url('Craft-API')}">
+                    <issvghelper icon="back-arrow" />
+                    <span>The Thread</span>
+                </a>
+            </div>
+            
+            <div class="thread-single-hero">
+                <div class="hero-cover">
+                    <div class="thread-hero-img">
+                        <isscript>
+                            var focpt = entry.banner[0].focalPoint != null ? entry.banner[0].focalPoint[0] * 100 + '% ': '50% ';
+                            var focpt2 = entry.banner[0].focalPoint != null ? entry.banner[0].focalPoint[1] * 100 + '%': '50%';
+                        </isscript>
+                    
+                        <picture>
+                            <source media="(min-width: 1440px)" srcset="${entry.banner[0].large}" />
+                            <source media="(min-width: 768px)" srcset="${entry.banner[0].medium}" />
+                            <img src="${entry.banner[0].small}" alt="${entry.title}" style="object-position: ${focpt} ${focpt2}"/> 
+                        </picture>
+                        
+                    </div>
+                    <isif condition="${!empty(entry.logo)}">
+                        <div class="copy listing">
+                            <div class="logo-img">
+                                <img src="${entry.logo[0].small}" alt="${entry.title}" /> 
+                            </div>
+                        </div>
+                    <iselseif condition="${!empty(entry.series) && !empty(entry.series[0].logos)}"/>
+                        <div class="copy listing">
+                            <div class="branding-img">
+                                <img src="${entry.series[0].logos[0].logo[0].small}" alt="${entry.series[0].title != null? entry.series[0].title : entry.title}" /> 
+                            </div>
+                        </div>
+                    </isif>
+                </div>
+            </div>
+            
+            
+            <div class="thread-headline">
+                <h1>${entry.title}</h1>
+                <isif condition="${!empty(entry.headlineSub)}"><p class="summary">${entry.headlineSub}</p></isif>
+            </div>
+            
+            <div class="article-body">
+            <isloop iterator="${entry.body}" alias="module" status="loopstate">
+                
+                <isif condition="${entry.body[loopstate.index].typeHandle=='text'}">
+                    
+                    <iscomment>Text Module</iscomment>
+                    <div class="row theThread text">
+                        <div><isprint value="${entry.body[loopstate.index].text}" encoding="off" /></div>
+                    </div>
+                    
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='image'}"/>      
+                
+                    <iscomment>Image Module</iscomment>
+                    <div class="row theThread image">
+                        <div class="image-position ${entry.body[loopstate.index].position}">
+                            <div class="image">
+                                <isscript>
+                                    var siteURL = entry.body[loopstate.index].image[0].siteURL,
+                                        url = '';
+                                    if (siteURL != null) {
+                                        importScript( "util/ViewHelpers.ds" );
+                                        url = constructUrlForCraft(siteURL);
+                                        var obj = JSON.parse(siteURL);
+                                        var linktitle = obj.label;
+                                    }
+                                </isscript>
+                                <isif condition="${siteURL != null && url != ''}">
+                                    <a title="${linktitle}" href="${url}">
+                                </isif>
+                                <isif condition="${entry.body[loopstate.index].image[0].extension == 'gif'}">
+                                    <img src="${entry.body[loopstate.index].image[0].url}" alt="${entry.body[loopstate.index].image[0].title}"/> 
+                                <iselse/>
+                                    <isscript>
+                                        var focpt = entry.body[loopstate.index].image[0].focalPoint != null ? entry.body[loopstate.index].image[0].focalPoint[0] * 100 + '% ' + entry.body[loopstate.index].image[0].focalPoint[1] * 100 + '%': '50% 50%';
+                                    </isscript>
+                                    <picture>
+                                        <source media="(min-width: 1440px)" srcset="${entry.body[loopstate.index].image[0].large}" />
+                                        <source media="(min-width: 768px)" srcset="${entry.body[loopstate.index].image[0].medium}" />
+                                        <img src="${entry.body[loopstate.index].image[0].small}" alt="${entry.body[loopstate.index].image[0].title}" style="object-position: ${focpt}"/> 
+                                    </picture>
+                                </isif>
+                                <isif condition="${siteURL != null && url != ''}">
+                                    </a>
+                                </isif>
+                                
+                            </div>
+                            
+                            <isif condition="${!empty(entry.body[loopstate.index].image[0].caption)}">
+                                <p>${entry.body[loopstate.index].image[0].caption}</p>
+                            </isif>
+                        </div>
+                    </div>
+                    
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='disruptor'}"/>      
+                
+                <iscomment>Disruptor Module</iscomment>
+                <div class="row theThread disruptor">
+                        <div class="${entry.body[loopstate.index].size}">
+                            <isscript>
+                                var siteURL = entry.body[loopstate.index].image[0].siteURL,
+                                url = '';
+                                if (siteURL != null) {
+                                    importScript( "util/ViewHelpers.ds" );
+                                    url = constructUrlForCraft(siteURL);
+                                    var obj = JSON.parse(siteURL);
+                                    var linktitle = obj.label;
+                                }
+                            </isscript>
+                            <isif condition="${siteURL != null && url != ''}">
+                                <a title="${linktitle}" href="${url}">
+                            </isif>
+                                <isscript>
+                                    var focpt = entry.body[loopstate.index].image[0].focalPoint != null ? entry.body[loopstate.index].image[0].focalPoint[0] * 100 + '% ' + entry.body[loopstate.index].image[0].focalPoint[1] * 100 + '%': '50% 50%';
+                                </isscript>
+                                <picture>
+                                    <source media="(min-width: 1440px)" srcset="${entry.body[loopstate.index].image[0].large}" />
+                                    <source media="(min-width: 768px)" srcset="${entry.body[loopstate.index].image[0].medium}" />
+                                    <img src="${entry.body[loopstate.index].image[0].small}" alt="${entry.body[loopstate.index].image[0].title}" style="object-position: ${focpt}"/> 
+                                </picture>
+                            <isif condition="${siteURL != null && url != ''}">
+                                </a>
+                            </isif>
+                        </div>
+                    </div>
+                    
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='quote'}"/>      
+                
+                <iscomment>Quote Module</iscomment>
+                <div class="row theThread quote">
+                        <div class="${entry.body[loopstate.index].position} ${entry.body[loopstate.index].style}">
+                            <blockquote>
+                                <p>${entry.body[loopstate.index].quote}</p>
+                                <isif condition="${!empty(entry.body[loopstate.index].credit)}">
+                                    <cite title="${entry.body[loopstate.index].credit}">${entry.body[loopstate.index].credit}</cite> 			      		
+                                </isif>
+                            </blockquote>
+                        </div>
+                    </div>
+                    
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='gallery'}"/>      
+                    
+                    <iscomment>Gallery Module</iscomment>
+                    <div class="row theThread gallery">
+                        <isif condition="${entry.body[loopstate.index].images.length > 2}">
+                            <div class="gallery-slider stance-flickity">
+                        <iselse/>
+                            <div class="gallery-diptych">
+                        </isif>
+                            <isloop iterator="${entry.body[loopstate.index].images}" alias="image">
+                                <isscript>
+                                    var focpt = image.focalPoint != null ? image.focalPoint[0] * 100 + '% ' + image.focalPoint[1] * 100 + '%': '50% 50%';
+                                </isscript>
+                                <div class="gallery-item">
+                                    <isscript>
+                                        var siteURL = image.siteURL,
+                                        url = '';
+                                        if (siteURL != null) {
+                                            importScript( "util/ViewHelpers.ds" );
+                                            url = constructUrlForCraft(siteURL);
+                                            var obj = JSON.parse(siteURL);
+                                            var linktitle = obj.label;
+                                        }
+                                    </isscript>
+                                    <isif condition="${siteURL != null && url != ''}">
+                                        <a title="${linktitle}" href="${url}">
+                                    </isif>
+                                    <picture>
+                                        <source media="(min-width: 768px)" srcset="${image.medium}" />
+                                        <img src="${image.small}" alt="${image.title}" style="object-position: ${focpt}"/> 
+                                    </picture>
+                                    <isif condition="${siteURL != null && url != ''}">
+                                        </a>
+                                    </isif>
+                                    
+                                </div>
+                            </isloop>
+                        </div>
+                    </div>
+            
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='qa'}"/>      
+                
+                <iscomment>Q&A Module</iscomment>
+                <div class="row theThread qa">
+                        <div class="dialog">
+                            <isloop iterator="${entry.body[loopstate.index].dialog}" alias="qa">
+                                <div class="dialog-item">
+                                    <div class="question"><p><isprint value="${qa.question}"  encoding="off" /></p></div>
+                                    <div class="answer"><isprint value="${qa.answer}"  encoding="off" /></div>
+                                </div>
+                            </isloop>
+                        </div>
+                    </div>
+                    
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='video'}"/>      
+                
+                <iscomment>Video Module</iscomment>
+                <div class="row theThread video">
+                        <div class="video-embed">
+                            <div class="youtube-player" data-id="${entry.body[loopstate.index].youtubeid}"></div>
+                        </div>
+                </div>
+
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='button'}"/>      
+                
+                <iscomment>Single Button Module</iscomment>
+                <div class="row theThread single-button">
+                        <a href="<isprint value="${entry.body[loopstate.index].buttonUrl}" encoding="off" />" title="<isprint value="${entry.body[loopstate.index].buttonLabel}" encoding="off" />" class="button"><isprint value="${entry.body[loopstate.index].buttonLabel}" encoding="off" /><span></span></a>
+                </div>
+
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='twoButtons'}"/>      
+                
+                <iscomment>Two Buttons Module</iscomment>
+                <div class="row theThread two-buttons">
+                        <a href="<isprint value="${entry.body[loopstate.index].buttonUrl1}" encoding="off" />" title="<isprint value="${entry.body[loopstate.index].buttonLabel1}" encoding="off" />" class="button"><isprint value="${entry.body[loopstate.index].buttonLabel1}" encoding="off" /><span></span></a>
+                        <a href="<isprint value="${entry.body[loopstate.index].buttonUrl2}" encoding="off" />" title="<isprint value="${entry.body[loopstate.index].buttonLabel2}" encoding="off" />" class="button"><isprint value="${entry.body[loopstate.index].buttonLabel2}" encoding="off" /><span></span></a>
+                </div>
+
+
+                <iscomment>Product Row Module</iscomment>
+                <iselseif condition="${entry.body[loopstate.index].typeHandle=='products'}"/>      
+                        <div class="row theThread shop-collection">
+                            <div class="product-strip">
+                                <isscript>
+                                    // move oos prods to the end
+                                    importPackage (dw.catalog);				                
+                                    var counter = 0;
+                                    var productArray = new dw.util.ArrayList();
+                                    var oosArray = new dw.util.ArrayList();
+                                    for each (var product in entry.body[loopstate.index].products) {
+                                        var productId = product.productID;
+                                        var prod = dw.catalog.ProductMgr.getProduct(productId);
+                                        if (prod.getAvailabilityModel().isInStock()) {
+                                            counter ++;
+                                            productArray.push(productId);
+                                        } else {
+                                            oosArray.push(productId);
+                                        }
+                                    }
+                                    productArray = productArray.concat(oosArray);
+                                    var headline = !empty(entry.body[loopstate.index].headline) ? entry.body[loopstate.index].headline : 'Shop the Collection';
+                                </isscript>
+                                
+                                <div class="shop-header">
+                                    <isprint value="${headline}" encoding="off" />
+                                </div>
+                                
+                                <isif condition="${counter > 0}">
+                                    <ul class="prods <isif condition="${counter > 4}">align-left</isif>">
+                                        <isloop items="${productArray}" var="product">
+                                            <li class="grid-tile">
+                                                <isinclude url="${URLUtils.url('Product-HitTile',
+                                                    'pid', product,
+                                                    'upsizeimage', 'true',
+                                                    'showpricing', 'true',
+                                                    'showpromotion', 'true')}"/>
+                                            </li>
+                                        </isloop>
+                                    </ul>
+                                    <isif condition="${!empty(entry.body[loopstate.index].ctaGroup) && !empty(entry.body[loopstate.index].ctaGroup[0].ctaURL) &&  !empty(entry.body[loopstate.index].ctaGroup[0].label)}">
+                                        <div class="shop-cta">
+                                            <isloop items="${entry.body[loopstate.index].ctaGroup}" var="cta">
+                                                <a href="<isprint value="${cta.ctaURL}" encoding="off" />" title="<isprint value="${cta.label}" encoding="off" />" class="button"><isprint value="${cta.label}" encoding="off" /><span></span></a>
+                                            </isloop>
+                                        </div>
+                                    </isif>
+                                <iselse/>
+                                    <div class="collection-sold-out">
+                                        <div class="sold-out button secondary">Sold Out</div>
+                                        <p>Looks like these went fast. Be sure to check back for more collection drops.</p>
+                                    </div>
+                                </isif>
+                                
+                            </div>
+                        </div>
+                </isif>          
+            </isloop>
+        </div>
+
+        <iscomment>Show Latest Posts</iscomment>
+        <div class="latest-posts the-thread-container">
+            <div class="related-posts-header">Latest Posts</div>
+            <div class="thread-list">
+                    <isset name="counter" value="${0}" scope="page" />
+                    <isloop iterator="${pdict.GraphNextPosts.data.entries}" alias="entry" status="loopstate">
+                        <isif condition="${entry.hidden}"><iscontinue/></isif>
+                        <isif condition="${currentPostSlug == entry.slug}"><iscontinue/></isif>
+                    
+                        <article class="article-tile article-count-<isprint value="${counter + 1}" style="INTEGER" />">
+                            <div class="article-tile-img">
+                            <a class="img-link" href="${URLUtils.url('Craft-API') + '?slug=' + entry.slug}">
+                                <isscript>
+                                    var focpt = entry.banner[0].focalPoint != null ? entry.banner[0].focalPoint[0] * 100 + '% ': '50% ';
+                                    var focpt2 = entry.banner[0].focalPoint != null ? entry.banner[0].focalPoint[1] * 100 + '%': '50%';
+                                </isscript>
+                                <picture>
+                                    <source media="(min-width: 768px)" srcset="${entry.banner[0].medium}" />
+                                <img src="${entry.banner[0].small}" alt="${entry.title}" style="object-position: ${focpt} ${focpt2}" class="tile-img"/> 
+                                </picture>
+                            </a>
+                            </div>
+                            <div class="article-tile-content">
+                            <a href="${URLUtils.url('Craft-API') + '?slug=' + entry.slug}" class="article-details">
+                                    <isif condition="${!empty(entry.series) && !empty(entry.series[0].logos)}">
+                                        <isset name="seriesTitle" value="${entry.series[0].title}" scope="page"/>
+                                        <isloop iterator="${entry.series[0].logos}" alias="logo">
+                                            <isif condition="${logo.style=='dark'}">
+                                                <div class="branding-img">
+                                                    <img src="${logo.logo[0].small}" alt="${seriesTitle}" /> 
+                                                </div>
+                                            </isif>
+                                        </isloop>
+                                    </isif>
+                                    <span class="article-name">${entry.title}</span>
+                                </a>
+                                <p>${entry.summary}</p>
+                                <a class="readmore" href="${URLUtils.url('Craft-API') + '?slug=' + entry.slug}">Read More <span></span></a>
+                            </div>
+                        </article>
+                    
+                        <isset name="counter" value="${counter + 1}" scope="page" />
+                        <isif condition="${counter >= 2}"><isbreak/></isif>
+                    
+                    </isloop>
+                </div>
+                <div class="show-all">
+                    <a class="button secondary" href="${URLUtils.url('Craft-API')}">View All<span></span></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</isdecorate>

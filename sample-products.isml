@@ -1,0 +1,138 @@
+**
+ * Hello! This is a template that grabs some products set by a merchant in a content slot and uses the salesforce commerce cloud (SFCC) API to generate some product tiles used as the default site 
+ * search suggestions before the user starts typing in the search field (set up to be an A/B test on the front end). It's a mix of HTML, the SFCC template language 
+ * (somewhat similar to handlebars, etc) and a backend script that is basically javascript syntax.
+ */
+
+<iscontent type="text/html" charset="UTF-8" compact="true"/>
+<iscache type="relative" minute="30" varyby="price_promotion"/>
+
+<isinclude template="util/modules"/>
+<isscript>
+    var imageryUtil	= require('int_dis/cartridge/scripts/utils/ImageryUtil.ds');    
+</isscript>
+
+<isif condition="${slotcontent.content.length > 0}">
+
+	<div class="search-product-offer">
+	    <div class="product-suggestions">
+	        <isloop items="${slotcontent.content}" var="product"  begin="0"  end="5">
+	        	<isif condition="${!product.getAvailabilityModel().isInStock()}">
+	        		<iscontinue/>
+	        	</isif>
+	            <isscript>
+                    var selectableColors = new dw.util.ArrayList(),
+                        PVM = product.variationModel,
+                        imageSource = product,
+                        colorVarAttr, 
+                        selectedColor, 
+                        image, 
+                        altImage;
+                    if (PVM) {
+                        colorVarAttr = PVM.getProductVariationAttribute('color')
+                        if (colorVarAttr) {
+                            selectableColors = PVM.getFilteredValues(colorVarAttr);
+                        }
+                        if (product.variationGroup && colorVarAttr) {
+                            imageSource = selectedColor = PVM.getSelectedValue(colorVarAttr);
+                            if (!imageSource) {
+                                if (!PVM.variants.isEmpty()) {
+                                    imageSource = PVM.defaultVariant;
+                                    if (imageSource) {
+                                        selectedColor = PVM.getVariationValue(imageSource, colorVarAttr);
+                                    }
+                                }
+                            }
+                        } else if (product.isMaster() && PVM.defaultVariant) {
+                            if (colorVarAttr) {
+                                imageSource = PVM.defaultVariant;
+                                selectedColor = imageSource.variationModel.getSelectedValue(colorVarAttr);
+                            } else {
+                                imageSource = PVM.master;
+                            }
+                        } else if (product.isVariant() && colorVarAttr) {
+                            imageSource = selectedColor = PVM.getSelectedValue(colorVarAttr);
+                            if (!imageSource) {
+                                if (!PVM.variants.isEmpty()) {
+                                    imageSource = PVM.variants[0];
+                                    selectedColor = imageSource.variationModel.getSelectedValue(colorVarAttr);
+                                }
+                            }
+                        } 
+                    }
+                    
+                    var productUrl = dw.web.URLUtils.url('Product-Show', 'pid', product.ID);
+                    if (product.isVariant() && selectedColor) {
+                        productUrl = product.masterProduct.variationModel.url("Product-Show", "color", selectedColor);
+                    }
+	            </isscript>
+
+	            <div class="product-suggestion">
+	                <a title="Go to: <isif condition="${product.isVariant()}"><isprint value="${product.masterProduct.name}"/><iselse/><isprint value="${product.name}"/></isif>" class="product-link" href="${productUrl}">
+	                    <div class="product-image">
+	                        <isset name="productImage" value="${product.getImage('large')}" scope="page"/>
+	                        <isif condition="${product.bundle}">
+                                <isscript>
+                                    var childBundle = product.getBundledProducts()[0];
+                                </isscript>
+                                <picture>
+                                    <source media="(min-width: 768px)" data-srcset="${imageryUtil.getImagery(childBundle).getImage('medium').url}" />
+                                    <img class="lazyoad" data-src="${imageryUtil.getImagery(childBundle).getImage('small').url}" alt="${product.name}" title="${product.name}"/>
+                                </picture>
+							<iselse/>
+                                <isif condition="${image != null}">
+                                    <picture>
+                                        <source media="(min-width: 768px)" data-srcset="${imageryUtil.getImagery(product).getImage('medium').url}" />
+                                        <img class="lazyoad" data-src="${imageryUtil.getImagery(product).getImage('small').url}" alt="${product.name}" title="${product.name}"/>
+                                    </picture>
+                                <iselse/>
+                                    <img src="${URLUtils.staticURL('/images/noimagesmall.png')}" alt="${product.name}" title="${product.name}" />
+                                </isif>
+				            </isif> 
+				        </div>
+				        <div class="product-details bfx-price-container">
+                            <isscript>
+                                var moniker = '',
+                                customMoniker = product.custom.moniker,
+                                category = product.custom['productCategoryType'];
+                                if (!empty(category)) {
+                                    if (!empty(customMoniker)) {
+                                        if (category == 'socks') {
+                                            moniker = customMoniker + ' ' + category;
+                                            for each (var innovation in product.custom.innovations) {
+                                                if (innovation == 'infiknit') {
+                                                    moniker = customMoniker + ' ' + innovation + ' ' + category;
+                                                }
+                                            }
+                                        } else if (category == 'underwear'){
+                                            moniker = customMoniker + ' ' + category;
+                                        } else {
+                                            moniker = customMoniker;
+                                        }
+                                    } else {
+                                        moniker = customMoniker;
+                                    }
+                                }
+                            </isscript>
+				            <isif condition="${!empty(moniker)}">
+								<span class="moniker"><isprint value="${moniker}"/></span>
+							</isif>                     
+							<div class="product-name">
+								<isif condition="${product.isVariant()}">
+								    <isprint value="${product.masterProduct.name}"/>
+								<iselse/>
+								    <isprint value="${product.name}"/>
+								</isif>
+	                        </div>
+	                        <isif condition="${!product.isProductSet()}">
+	                              <div class="product-price bfx-price bfx-list-price">
+	                                  <isprint value="${ product.getPriceModel().getMinPrice()}" />                                        
+	                              </div>
+	                        </isif>
+	                    </div>
+	                </a>
+				</div>
+	        </isloop>
+	    </div>
+	</div>	
+</isif>

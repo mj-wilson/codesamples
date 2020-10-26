@@ -1,0 +1,347 @@
+// styles for global banner component template
+.banner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  &.fullWidth {
+    @extend .max-width;
+    max-width: 100%;
+  }
+  &.contentWidth {
+    @extend .max-width;
+  }
+  &.contentWidthPlus {
+    @extend .max-width;
+    max-width: calc(#{$maxwidth} + 200px);
+  }
+  .banner-inner {
+    position: relative;
+  }
+  .banner-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    img,
+    video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: var(--primary-focal-point);
+      @include respond(medium-down) {
+        object-position: var(--primary-mobile-focal-point);
+        height: 100%;
+        max-height: 100%;
+      }
+    }
+    video {
+      object-position: 50% 50%;
+      &.desktop-video-banner.has-mobile {
+        @include respond(medium-down) {
+          display: none;
+        }
+      }
+      &.mobile-video-banner {
+        display: none;
+        @include respond(medium-down) {
+          display: block;
+        }
+      }
+    }
+  }
+  .banner-content {
+    height: 43.5vw;
+    min-height: min-content;
+    max-height: 72vh;
+    position: relative;
+    padding: 5%;
+    @include respond(xlarge-desktop-down) {
+      padding: 5%;
+      max-height: 100%;
+      height: min-content;
+      min-height: 43.5vw;
+    }
+    @include respond(medium-down) {
+      min-height: 60vh;
+      height: min-content;
+      max-height: 100%;
+      padding: rem(30px) rem(20px) rem(20px);
+    }
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    &.primary-justify-left {
+      text-align: left;
+    }
+    &.primary-justify-center {
+      text-align: center;
+    }
+    &.primary-justify-right {
+      text-align: right;
+    }
+    &.primary-position-y-top {
+      align-items: flex-start;
+    }
+    &.primary-position-y-middle {
+      align-items: center;
+    }
+    &.primary-position-y-bottom {
+      align-items: flex-end;
+    }
+    &.primary-position-x-left {
+      justify-content: flex-start;
+    }
+    &.primary-position-x-center {
+      justify-content: center;
+    }
+    &.primary-position-x-right {
+      justify-content: flex-end;
+    }
+    @include respond(medium-down) {
+      &.primaryMobile-justify-left {
+        text-align: left;
+      }
+      &.primaryMobile-justify-center {
+        text-align: center;
+      }
+      &.primaryMobile-justify-right {
+        text-align: right;
+      }
+      &.primaryMobile-position-y-top {
+        align-items: flex-start;
+      }
+      &.primaryMobile-position-y-middle {
+        align-items: center;
+      }
+      &.primaryMobile-position-y-bottom {
+        align-items: flex-end;
+      }
+      &.primaryMobile-position-x-left {
+        justify-content: flex-start;
+      }
+      &.primaryMobile-position-x-center {
+        justify-content: center;
+      }
+      &.primaryMobile-position-x-right {
+        justify-content: flex-end;
+      }
+    }
+    .banner-lockup {
+      max-width: rem(700px);
+      color: $nero;
+      &.theme-secondary {
+        color: $white;
+        h1,
+        h2 {
+          color: $white;
+        }
+      }
+      p.caption {
+        font-size: 0.8rem;
+        line-height: 1em;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin: 0 0 1rem 0;
+      }
+      p.subhead {
+        @include responsive-font(4vw, 0.9rem, 1rem, 16px);
+        line-height: 1.5em;
+        margin: 0 0 1rem 0;
+        display: inline-block;
+        max-width: rem(500px);
+      }
+      h1 {
+        @include responsive-font(4vw, 3rem, 4rem, 48px);
+        line-height: 0.9em;
+        margin: 0 0 0.75rem 0;
+      }
+      .buttons {
+        margin: 0 rem(-3px);
+        display: flex;
+        a {
+          margin: 0 rem(3px);
+          @include respond(medium-down) {
+            margin-bottom: rem(10px);
+          }
+        }
+      }
+      .logo-lockup {
+        max-width: 100%;
+        margin: 0 0 1rem 0;
+        img {
+          max-width: 100%;
+          max-height: 100%;
+          display: inline-block;
+          @include respond(medium-down) {
+            max-width: 80%;
+          }
+        }
+      }
+      .legal {
+        position: absolute;
+        right: rem(20px);
+        bottom: rem(18px);
+        opacity: 0.7;
+        @include font-size(9px);
+        line-height: 1em;
+        @include respond(medium-down) {
+          right: rem(10px);
+          bottom: rem(10px);
+        }
+      }
+    }
+  }
+  // Secondary (Short) Banner (fixed height; cover background image)
+  &.style-secondary {
+    .banner-content {
+      height: 15.7vw;
+      min-height: min-content;
+      max-height: rem(250px);
+      padding: rem(20px);
+      @include respond(xlarge-desktop-down) {
+        padding: rem(20px);
+        max-height: rem(250px);
+        height: min-content;
+        min-height: 15.7vw;
+      }
+      @include respond(medium-down) {
+        min-height: 35.5vw;
+        padding: rem(20px);
+        height: min-content;
+      }
+      .logo-lockup {
+        margin: 0;
+      }
+    }
+  }
+  // Mini Banner (height set by img height)
+  &.mini-banner {
+    .banner-content {
+      height: auto;
+      min-height: min-content;
+      max-height: 100%;
+      padding: rem(55px);
+      h1 {
+        @include responsive-font(5vw, 3.8rem, 4.8rem, 70px);
+      }
+      @include respond(medium-down) {
+        padding: rem(55px) 5%;
+      }
+    }
+  }
+  // Fixed Background
+  &.fixed-bg {
+    .banner-inner {
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+      body.touch & {
+        background-attachment: scroll;
+      }
+    }
+  }
+  // Scroll Down Arrow Icon
+  &.scroll-down-arrow {
+    overflow: visible;
+    &:after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: rem(44px);
+      height: rem(44px);
+      background: $white url("../images/svg-icons/scroll-down-arrow.svg") center
+        center no-repeat;
+      border-radius: 50%;
+      box-shadow: 0px 10px 15px rgba($nero, 0.1);
+      z-index: 9999;
+    }
+  }
+  // Gradient Screen Setup
+  $gradients_light: () !default;
+  $gradients_light: map-merge(
+    (
+      bottom-center-light:
+        linear-gradient(0deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      bottom-left-light:
+        linear-gradient(45deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      middle-left-light:
+        linear-gradient(90deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      top-left-light:
+        linear-gradient(135deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      top-center-light:
+        linear-gradient(180deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      top-right-light:
+        linear-gradient(225deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      middle-right-light:
+        linear-gradient(270deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      bottom-right-light:
+        linear-gradient(315deg, rgba($white, 0.2) 0%, rgba($white, 0) 100%),
+      middle-center-light:
+        radial-gradient(
+          ellipse at center,
+          rgba($white, 0.2) 0%,
+          rgba($white, 0) 100%
+        ),
+    ),
+    $gradients_light
+  );
+
+  $gradients_dark: () !default;
+  $gradients_dark: map-merge(
+    (
+      bottom-center-dark:
+        linear-gradient(0deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      bottom-left-dark:
+        linear-gradient(45deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      middle-left-dark:
+        linear-gradient(90deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      top-left-dark:
+        linear-gradient(135deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      top-center-dark:
+        linear-gradient(180deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      top-right-dark:
+        linear-gradient(225deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      middle-right-dark:
+        linear-gradient(270deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      bottom-right-dark:
+        linear-gradient(315deg, rgba($black, 0.2) 0%, rgba($black, 0) 100%),
+      middle-center-dark:
+        radial-gradient(
+          ellipse at center,
+          rgba($black, 0.2) 0%,
+          rgba($black, 0) 100%
+        ),
+    ),
+    $gradients_dark
+  );
+
+  // Gradient Screen
+  @mixin gradientScreen($parent, $gradient) {
+    #{$parent} {
+      .banner-content {
+        background: $gradient;
+      }
+    }
+  }
+
+  // Generate Gradient Classes
+  @each $gradient, $value in $gradients_light {
+    @include gradientScreen("&.screen-primary-#{$gradient}", $value);
+  }
+  @each $gradient, $value in $gradients_dark {
+    @include gradientScreen("&.screen-primary-#{$gradient}", $value);
+  }
+  @include respond(medium-down) {
+    @each $gradient, $value in $gradients_light {
+      @include gradientScreen("&.screen-primaryMobile-#{$gradient}", $value);
+    }
+    @each $gradient, $value in $gradients_dark {
+      @include gradientScreen("&.screen-primaryMobile-#{$gradient}", $value);
+    }
+  }
+}
